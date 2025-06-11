@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Countdown ฝึกงาน</title>
+  <style>
+    body {
+      font-family: "Kanit", sans-serif;
+      background-color: #f4f4f4;
+      padding: 40px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .box {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 600px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .label {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .value {
+      font-size: 1.8rem;
+      color: #2196F3;
+    }
+    #today {
+      font-size: 1.2rem;
+      margin-top: 10px;
+      color: #666;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+      font-size: 1.1rem;
+      color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <h1>⏳ นับถอยหลังวันสิ้นสุดฝึกงาน</h1>
+  <div id="today">...</div>
+
+  <div class="box">
+    <div class="label">🎯 แบบรวมวันหยุด (ทุกวัน)</div>
+    <div id="allDaysCountdown" class="value">...</div>
+  </div>
+
+  <div class="box">
+    <div class="label">🗓️ แบบเฉพาะวันทำงาน (ไม่รวมวันหยุด)</div>
+    <div id="workdaysCountdown" class="value">...</div>
+  </div>
+
+  <div class="box">
+    <div class="label">📌 วันหยุดนักขัตฤกษ์ระหว่างฝึกงาน</div>
+    <ul id="holidayList"></ul>
+  </div>
+
+  <script>
+    const endDate = new Date("2025-09-26T17:00:00");
+
+    const customHolidays = [
+      "2025-07-10",
+      "2025-07-11",
+      "2025-07-28",
+      "2025-08-11",
+      "2025-08-12"
+    ];
+
+    const holidayNames = {
+      "2025-07-10": "10 กรกฎาคม 2568",
+      "2025-07-11": "11 กรกฎาคม 2568",
+      "2025-07-28": "28 กรกฎาคม 2568",
+      "2025-08-11": "11 สิงหาคม 2568",
+      "2025-08-12": "12 สิงหาคม 2568"
+    };
+
+    function isCustomHoliday(date) {
+      return customHolidays.includes(date.toISOString().slice(0, 10));
+    }
+
+    function isWorkday(date) {
+      const day = date.getDay();
+      return day !== 0 && day !== 6 && !isCustomHoliday(date);
+    }
+
+    function updateAllDaysCountdown() {
+      const now = new Date();
+      const distance = endDate - now;
+
+      if (distance <= 0) {
+        document.getElementById("allDaysCountdown").textContent = "สิ้นสุดการฝึกงานแล้ว 🎉";
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById("allDaysCountdown").textContent =
+        `${days} วัน ${hours} ชั่วโมง ${minutes} นาที ${seconds} วินาที`;
+    }
+
+    function updateWorkdaysCountdown() {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      let count = 0;
+      const temp = new Date(today);
+      while (temp <= endDate) {
+        if (isWorkday(temp)) count++;
+        temp.setDate(temp.getDate() + 1);
+      }
+
+      document.getElementById("workdaysCountdown").textContent = `${count} วันทำงานที่เหลือ`;
+    }
+
+    function updateTodayDate() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const thaiDate = now.toLocaleDateString('th-TH', options);
+      document.getElementById("today").textContent = `📅 วันนี้: ${thaiDate}`;
+    }
+
+    function showHolidayList() {
+      const list = document.getElementById("holidayList");
+      list.innerHTML = "";
+      customHolidays.forEach(date => {
+        const li = document.createElement("li");
+        li.textContent = `• ${holidayNames[date]}`;
+        list.appendChild(li);
+      });
+    }
+
+    function updateAll() {
+      updateTodayDate();
+      updateAllDaysCountdown();
+      updateWorkdaysCountdown();
+      showHolidayList();
+    }
+
+    updateAll();
+    setInterval(updateAll, 1000);
+  </script>
+</body>
+</html>
